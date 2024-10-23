@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\SupplierModel;
-use Yajra\DataTables\Facades\DataTables;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 
 class SupplierController extends Controller
@@ -37,17 +38,11 @@ class SupplierController extends Controller
                 // $btn .= '<form class="d-inline-block" method="POST" action="'.url('/supplier/'.$sup->supplier_id).'">'
                 //     . csrf_field() . method_field('DELETE') .
                 //     '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button></form>';
-                
-                //UPDATE JS6
-
-                // $btn = '<a href="'.url('/supplier/' . $sup->supplier_id).'" class="btn btn-info btn-sm">Detail</a> ';
-                // $btn .= '<a href="'.url('/supplier/' . $sup->supplier_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-                // $btn .= '<form class="d-inline-block" method="POST" action="'.url('/supplier/'.$sup->supplier_id).'">'
-                //     . csrf_field() . method_field('DELETE') .
-                //     '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button></form>';
                 $btn = '<a href="' . url('/supplier/' . $sup->supplier_id) . '" class="btn btn-info btn-sm">Detail</a> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/supplier/' . $sup->supplier_id .'/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
-                $btn .= '<button onclick="modalAction(\'' . url('/supplier/' . $sup->supplier_id .'/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/supplier/' . $sup->supplier_id .
+                    '/edit_ajax') . '\')" class="btn btn-warning btn-sm">Edit</button> ';
+                $btn .= '<button onclick="modalAction(\'' . url('/supplier/' . $sup->supplier_id .
+                    '/delete_ajax') . '\')" class="btn btn-danger btn-sm">Hapus</button> ';
                 return $btn;
             })
         ->rawColumns(['aksi'])
@@ -151,11 +146,12 @@ class SupplierController extends Controller
         }
     }
 
-    // JS6
+    // js6
     public function create_ajax()
     {
         return view('supplier.create_ajax');
     }
+
     public function store_ajax(Request $request)
     {
         // cek apakah request berupa ajax
@@ -182,12 +178,14 @@ class SupplierController extends Controller
         }
         redirect('/');
     }
+
     // Menampilkan halaman form edit supplier ajax
     public function edit_ajax(string $id)
     {
         $supplier = SupplierModel::find($id);
         return view('supplier.edit_ajax', ['supplier' => $supplier]);
     }
+
     public function update_ajax(Request $request, $id)
     {
         // cek apakah request dari ajax
@@ -222,11 +220,13 @@ class SupplierController extends Controller
         }
         return redirect('/');
     }
+
     public function confirm_ajax(string $id)
     {
         $supplier = SupplierModel::find($id);
         return view('supplier.confirm_ajax', ['supplier' => $supplier]);
     }
+
     public function delete_ajax(Request $request, $id)
     {
         // cek apakah request dari ajax
@@ -246,5 +246,17 @@ class SupplierController extends Controller
             }
         }
         return redirect('/');
+    }
+    public function export_pdf()
+    {
+        $supplier = SupplierModel::select('supplier_kode', 'supplier_nama', 'supplier_alamat')
+            ->get();
+
+        $pdf = Pdf::loadView('supplier.export_pdf', ['supplier' => $supplier]);
+        $pdf->setPaper('a4', 'potrait');
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->render();
+
+        return $pdf->stream('Data Supplier' . date('Y-m-d H:i:s') . '.pdf');
     }
 }

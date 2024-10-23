@@ -69,6 +69,8 @@
                         <small id="error-password" class="error-text text-danger"></small>
                     </div>
                     <div class="row">
+                        <div class="col-8">
+                        </div>
                         <div class="col-4">
                             <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
                         </div>
